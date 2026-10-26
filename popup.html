@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<title>YouTube transcript</title>
+<link rel="stylesheet" href="popup.css">
+<main>
+  <header><span class="badge">CC ↓</span><h1>YouTube transcript</h1></header>
+  <p id="video">Reading the current video…</p>
+  <label for="language">Caption language</label>
+  <select id="language" disabled></select>
+  <label for="format">File format</label>
+  <select id="format"><option value="txt">Plain text (.txt)</option><option value="srt">Subtitles (.srt)</option><option value="vtt">WebVTT (.vtt)</option><option value="json">Timestamped JSON (.json)</option></select>
+  <button id="download" disabled>Download transcript</button>
+  <p id="status" role="status" aria-live="polite">Loading captions…</p>
+  <small>Downloads existing captions. Automatic captions may contain mistakes.</small>
+  <p id="theme-status" hidden role="status"></p>
+</main>
+<script type="module" src="popup.js"></script>
+</html>

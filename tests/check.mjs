@@ -1,0 +1,33 @@
+import assert from 'node:assert/strict';
+import {formatTranscript, timestamp, filename} from '../format.js';
+import {readCaptions} from '../captions.js';
+const segments=[{text:'Hello café',start:0,duration:1.5},{text:'Next <line>',start:1.5,duration:2}];
+assert.equal(timestamp(3661.125),'01:01:01,125');
+assert.equal(JSON.parse(formatTranscript(segments,'json'))[0].text,'Hello café');
+assert.match(formatTranscript(segments,'srt'),/00:00:00,000 --> 00:00:01,500/);
+assert.match(formatTranscript(segments,'vtt'),/^WEBVTT\n\n/);
+assert.match(formatTranscript(segments,'vtt'),/&lt;line&gt;/);
+assert.equal(formatTranscript(segments,'txt'),'Hello café\nNext <line>\n');
+assert(!filename('../a/b','123','../en','txt').includes('/'));
+globalThis.location={href:'https://www.youtube.com/watch?v=jNQXAC9IVRw'};
+const track={baseUrl:'https://www.youtube.com/api/timedtext?v=jNQXAC9IVRw',languageCode:'en',name:{simpleText:'English'}};
+const response={videoDetails:{videoId:'jNQXAC9IVRw',title:'Test'},captions:{playerCaptionsTracklistRenderer:{captionTracks:[track]}}};
+globalThis.document={getElementById:()=>({getPlayerResponse:()=>response})};
+assert.equal((await readCaptions()).tracks[0].language,'en');
+const events={events:[{tStartMs:500,dDurationMs:1500,segs:[{utf8:'Hello'}]}]};
+globalThis.fetch=async()=>({ok:true,text:async()=>JSON.stringify(events)});
+assert.deepEqual((await readCaptions(0,'jNQXAC9IVRw')).segments,[{text:'Hello',start:.5,duration:1.5}]);
+assert.match((await readCaptions(0,'xxxxxxxxxxx')).error,/video changed/);
+let count=0;
+globalThis.fetch=async(url,options)=>{
+ count++;
+ if(count===1)return {ok:true,text:async()=>''};
+ if(count===2){assert.equal(options.credentials,'omit');return {ok:true,json:async()=>response};}
+ assert.equal(options.credentials,'omit');return {ok:true,text:async()=>JSON.stringify(events)};
+};
+assert.equal((await readCaptions(0)).segments.length,1);
+assert.equal(count,3);
+count=0;
+globalThis.fetch=async()=>{count++;return count===1?{ok:true,text:async()=>''}:{ok:true,json:async()=>({})};};
+assert.match((await readCaptions(0)).error,/did not return/);
+console.log('PASS: formats, timing, Unicode, safe filenames, caption extraction, fallback, navigation and unavailable captions.');

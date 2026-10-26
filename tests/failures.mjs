@@ -1,0 +1,40 @@
+import assert from 'node:assert/strict';
+import {readCaptions} from '../captions.js';
+import {filename, formatTranscript} from '../format.js';
+
+const id = 'jNQXAC9IVRw';
+const track = {baseUrl:'https://www.youtube.com/api/timedtext?v='+id,languageCode:'en'};
+let response;
+globalThis.document={getElementById:()=>({getPlayerResponse:()=>response})};
+function reset(tracks=[track]) {
+  globalThis.location={href:'https://www.youtube.com/watch?v='+id};
+  response={videoDetails:{videoId:id,title:'Test'},captions:{playerCaptionsTracklistRenderer:{captionTracks:tracks}}};
+}
+reset([]);
+assert.match((await readCaptions()).error,/No captions/);
+reset(); location.href='https://example.com/watch?v='+id;
+assert.match((await readCaptions()).error,/Open a YouTube/);
+reset(); response.videoDetails.videoId='different';
+assert.match((await readCaptions()).error,/still loading/);
+reset(); assert.match((await readCaptions(99)).error,/selection changed/);
+reset([{...track,baseUrl:'https://example.com/api/timedtext'}]);
+let calls=0;globalThis.fetch=async()=>{calls++;throw Error('Unexpected network access');};
+assert.match((await readCaptions(0)).error,/unsupported caption URL/);assert.equal(calls,0);
+reset(); globalThis.fetch=async()=>{calls++;return {ok:false,status:429};};
+assert.match((await readCaptions(0)).error,/HTTP 429/);assert.equal(calls,1);
+reset(); globalThis.fetch=async()=>{throw new DOMException('Timed out','TimeoutError');};
+assert.match((await readCaptions(0)).error,/Timed out/);
+reset(); globalThis.fetch=async()=>({ok:true,text:async()=>'{broken'});
+assert.equal(typeof (await readCaptions(0)).error,'string');
+reset();calls=0;
+globalThis.fetch=async()=>{calls++;return calls===1?{ok:true,text:async()=>''}:{ok:true,json:async()=>({captions:{playerCaptionsTracklistRenderer:{captionTracks:[{...track,languageCode:'de'}]}}})};};
+assert.match((await readCaptions(0)).error,/did not return/);assert.equal(calls,2);
+reset();calls=0;
+globalThis.fetch=async()=>{calls++;return calls===1?{ok:true,text:async()=>''}:{ok:true,json:async()=>({captions:{playerCaptionsTracklistRenderer:{captionTracks:[{...track,kind:'asr'}]}}})};};
+assert.match((await readCaptions(0)).error,/did not return/);assert.equal(calls,2);
+const name=filename('字幕🙂'.repeat(100),id,'zh-Hant','txt');
+assert(new TextEncoder().encode(name).length<=255);
+assert(!name.includes('\ufffd'));
+assert(!filename('../hidden',id,'en','txt').startsWith('.'));
+assert.match(formatTranscript([{text:'مرحبا 世界',start:3600,duration:2}],'srt'),/01:00:00,000 --> 01:00:02,000/);
+console.log('PASS: no captions, unsupported sites, stale player, missing track, hostile URL, 429 without retry, timeout, malformed response, language/type preservation, multilingual filenames and subtitles.');
