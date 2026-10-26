@@ -14,6 +14,8 @@ cd youtube-transcripts-chromium
 3. Choose **Load unpacked**, then select this directory.
 4. Open a YouTube video, click the extension, choose a language and format, and download.
 
+The pinned icon is coloured and enabled on HTTPS YouTube pages (`youtube.com`, `www.youtube.com`, and `m.youtube.com`). Elsewhere Chromium greys it out; clicking the disabled icon opens Chromium's extension menu. Pinning remains under your control. After updating, reload the extension in `chrome://extensions`.
+
 No server, API key, or build step. The extension only accesses the current tab when invoked. It uses Chromium's download dialog and retrieves existing captions directly from YouTube. It does not send data to another service.
 
 ## Follow the Omarchy theme
@@ -32,7 +34,7 @@ Without the bridge, the popup uses browser system colours and shows a setup noti
 
 Captions must be available on the video. YouTube may block timed-caption requests; errors are shown in the popup. YouTube's internal player interface can change, so this extension may need updates. Keep the popup open while fetching.
 
-Permissions: `activeTab` for the selected video, `scripting` to read its caption metadata, `downloads` to save a file, and `nativeMessaging` for the local read-only theme bridge. No persistent site access.
+Permissions: `activeTab` for the selected video, `scripting` to read its caption metadata, `downloads` to save a file, `nativeMessaging` for the local read-only theme bridge, and `declarativeContent` so Chromium enables the icon on supported sites without exposing your browsing URLs to the extension. No persistent site access.
 
 ## Tests
 
@@ -41,6 +43,7 @@ Requires Node.js and Python 3.11 or later. No dependency installation is needed.
 ```bash
 node tests/check.mjs
 node tests/failures.mjs
+node tests/toolbar.mjs
 python3 tests/theme_test.py
 ```
 
