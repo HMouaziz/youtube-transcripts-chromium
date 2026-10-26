@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "YouTube Transcript Download",
-  "version": "1.1.3",
+  "version": "1.2.0",
   "description": "Download captions from the current YouTube video as text, JSON, or subtitles.",
   "minimum_chrome_version": "103",
   "permissions": [

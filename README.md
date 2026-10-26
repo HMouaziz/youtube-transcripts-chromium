@@ -32,7 +32,11 @@ The installer writes `~/.config/chromium/NativeMessagingHosts/local.omarchy.yout
 
 Without the bridge, the popup uses browser system colours and shows a setup notice; downloads still work. Native messaging requires the additional `nativeMessaging` permission. To remove the integration, remove its single native-host registration file.
 
-Captions must be available on the video. YouTube may block timed-caption requests; errors are shown in the popup. YouTube's internal player interface can change, so this extension may need updates. Keep the popup open while fetching.
+Opening the popup immediately reads available languages and starts fetching the selected track. Complete caption entries appear in a partial preview as YouTube sends them. **Download when ready** queues a save after the full response is validated; partial text is never downloaded. Format changes reuse the loaded transcript. Changing language cancels the previous request; closing the popup discards its cache and attempts to cancel loading. Requests time out after 30 seconds.
+
+The popup distinguishes no caption tracks from access restrictions, rate limits, connection problems and unreadable or empty responses. When YouTube does not explain a failure, it says so. This retrieves existing YouTube captions only; it does not generate transcripts.
+
+Prefetching reduces the wait after clicking Download, but cannot make YouTube respond faster. Some responses arrive in one chunk, so a partial preview may not appear. Captions must be available on the video. YouTube may block timed-caption requests; errors are shown in the popup. YouTube's internal player interface can change, so this extension may need updates. Keep the popup open while fetching.
 
 Permissions: `activeTab` for the selected video, `scripting` to read its caption metadata, `downloads` to save a file, `nativeMessaging` for the local read-only theme bridge, `tabs` to check the hostname on navigation and tab switching, and `declarativeContent` to remove the old toolbar rules during upgrades. Tab URLs are checked locally and are not stored or sent to the developer. No persistent site access.
 
@@ -44,6 +48,8 @@ Requires Node.js and Python 3.11 or later. No dependency installation is needed.
 node tests/check.mjs
 node tests/failures.mjs
 node tests/toolbar.mjs
+node tests/progress.mjs
+node tests/popup.mjs
 python3 tests/theme_test.py
 ```
 
