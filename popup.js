@@ -44,12 +44,9 @@ const controller=createPopupController({
       fallback:'YouTube returned an empty response. Trying its alternate caption endpoint…',parsing:'Checking the complete transcript…',
       ready:`Transcript ready · ${state.received} ${state.received===1?'segment':'segments'}`,saving:'Opening the save dialog…',saved:'Download started.'};
     $('status').textContent=state.error?`${state.error.title}. ${state.error.detail}`:(messages[state.stage]||'');
-    if(state.queued)$('status').textContent+=' The file will save when the full transcript is ready. Keep this popup open.';
+    if(state.queued)$('status').textContent+=' Keep this popup open to save when ready.';
     $('retry').hidden=state.stage!=='error' && !state.error;
     $('retry').textContent=state.error?.retryable?'Try again':'Check again';
-    $('preview-section').hidden=!state.preview.length;
-    $('preview-label').textContent=state.data?'Transcript preview (first 80 segments)':'Partial transcript · still receiving';
-    $('preview').textContent=state.preview.map(s=>s.text).join('\n');
   }
 });
 chrome.runtime.onMessage.addListener((message,sender)=>{

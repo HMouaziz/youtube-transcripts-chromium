@@ -4,7 +4,7 @@ Initial open-source repository release under the MIT licence. Installation curre
 
 ## 1.2.0 candidate — availability and progress
 
-YouTube-only scope. Language metadata is shown before text retrieval; the selected track is prefetched and complete caption entries are previewed while receiving. Downloads can be queued but require full response validation. Format changes reuse the completed result. Language changes cancel old requests and stale results are ignored. Unavailability and retrieval errors have distinct messages, including provider reasons when supplied. Permission and theme boundaries are unchanged.
+YouTube-only scope. Language metadata is shown before text retrieval; the selected track is prefetched and receiving progress is shown without a transcript preview. Downloads can be queued but require full response validation. Format changes reuse the completed result. Language changes cancel old requests and stale results are ignored. Unavailability and retrieval errors have distinct messages, including provider reasons when supplied. The compact popup uses theme-relative spacing and retains theme-controlled fonts and colours. Permission and theme boundaries are unchanged.
 
 Controlled stream tests cover early UTF-8 previews, malformed final data, cancellation and typed errors. Popup state tests cover immediate metadata, queued saves, stale results, retries and reuse. These fixtures demonstrate responsiveness, not faster YouTube server response times. This candidate has not been published.
 
